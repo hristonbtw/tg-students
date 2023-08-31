@@ -7,13 +7,16 @@ class Lesson(BaseModel):
     __tablename__ = "lessons"
 
     # Lesson title
-    title = Column(VARCHAR(64), unique=False, nullable=False)
+    title = Column(VARCHAR(64), unique=False, nullable=False, primary_key=True)
 
     # Lesson description
-    description = Column(TEXT, uniqe=False, nullabe=True)
+    description = Column(TEXT, unique=False, nullable=True)
 
     # Lesson content
-    content = Column(TEXT, uniqe=False, nullable=True)
+    content = Column(TEXT, unique=False, nullable=True)
 
     # Lesson task
-    task = Column(TEXT, uniqe=False, nullable=True)
+    task = Column(TEXT, unique=False, nullable=True)
+
+    def __str__(self) -> str:
+        return f"<Lesson:{self.title}>"

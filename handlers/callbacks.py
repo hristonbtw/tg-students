@@ -4,6 +4,7 @@ from aiogram import Bot
 from aiogram.types import URLInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv, find_dotenv
+from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from functions import functions as func
 from keyboards import keyboards as kb
@@ -17,19 +18,24 @@ router = Router()
 
 
 @router.callback_query()
-async def callback_handler(call: types.CallbackQuery, state: FSMContext, bot: Bot):
+async def callback_handler(call: types.CallbackQuery, state: FSMContext, bot: Bot, session_maker: async_sessionmaker):
     user_id = call.from_user.id
     username = call.from_user.username
     chat_id = call.message.chat.id
-    admin_id = int(os.getenv('admin'))
 
     if call.data == "profile":
-        #data = func.get_userdata(user_id)
+        data = await func.get_userdata(user_id, session_maker=session_maker)
 
         await call.answer()
-        # await call.message.edit_text(text=f"🪪 Ваш профиль:"
-        #                                   f"\n\n👤 ФИО: {data[0]}"
-        #                                   f"\n🏠 Адрес: {data[1]}"
-        #                                   f"\n☎️Номер телефона: {data[2]}"
-        #                                   f"\n📦 Курьерская служба: {data[3]}",
-        #                              reply_markup=kb.profile_menu)
+
+
+    if call.data == "mod_menu":
+        await call.answer()
+
+        if await func.check_access(user_id=user_id, session_maker=session_maker):
+            await call.message.edit_text("Вы перешли в меню модератора",
+                                         reply_markup=kb.mod_menu)
+        else:
+            await call.message.edit_text("Вы не модератор.",
+                                         reply_markup=kb.main_menu)
+

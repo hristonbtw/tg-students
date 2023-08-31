@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from sqlalchemy import URL
 
-from middlewares.register_check import RegisterCheck
 from state import storage
 from handlers import handlers, callbacks
 from db import BaseModel, create_async_engine, get_session_maker, proceed_schemas
@@ -35,9 +34,6 @@ async def main():
     async_engine = create_async_engine(postgres_url)
     session_maker = get_session_maker(async_engine)
     await proceed_schemas(async_engine, BaseModel.metadata)
-
-    dp.message.middleware(RegisterCheck)
-    dp.callback_query.middleware(RegisterCheck)
 
     dp.include_router(handlers.router)
     dp.include_router(callbacks.router)

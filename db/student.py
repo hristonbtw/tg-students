@@ -20,3 +20,6 @@ class Student(BaseModel):
 
     # Student active lesson (From table Lesson)
     active_lesson = Column(Integer, nullable=True, unique=False)
+
+    def __str__(self) -> str:
+        return f'<Student:{self.user_id}>'

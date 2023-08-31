@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from keyboards import keyboards as kb
 from functions import functions as func
+from middlewares.register_check import RegisterCheck
 from state.storage import States
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -14,16 +15,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 router = Router()
+router.message.middleware(RegisterCheck())
 
 
 @router.message(Command("start"))
-async def cmd_start(message: types.Message, session: async_sessionmaker):
-    user_id = message.from_user.id
-    username = message.from_user.username
-
-    #func.insert_new_member(user_id=user_id, username=username)
-
-
+async def cmd_start(message: types.Message):
     await message.answer("qq 👋\n\nВыбери опции ниже:",
                          reply_markup=kb.main_menu)
 

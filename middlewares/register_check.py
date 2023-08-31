@@ -25,15 +25,14 @@ class RegisterCheck(BaseMiddleware):
                 if user is not None:
                     pass
                 else:
-                    user = User(
+                    user: User = User(
                         user_id=event.from_user.id,
-                        username=event.from_user.username
+                        username=event.from_user.username,
+                        first_name=event.from_user.first_name,
+                        second_name=event.from_user.last_name,
+                        role="student"
                     )
 
                     await session.merge(user)
-                    if isinstance(event, Message):
-                        await event.answer("Ты зарегистрирован!")
-                    else:
-                        await event.message.answer("Ты зарегистрирован!")
 
         return await handler(event, data)

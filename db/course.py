@@ -7,7 +7,7 @@ class Course(BaseModel):
     __tablename__ = "courses"
 
     # Course name
-    title = Column(VARCHAR(64), unique=False, nullable=False)
+    title = Column(VARCHAR(64), unique=False, nullable=False, primary_key=True)
 
     # Course description
     description = Column(TEXT, unique=False, nullable=True)
@@ -17,3 +17,6 @@ class Course(BaseModel):
 
     # Course lifetime
     lifetime = Column(Integer, unique=False, nullable=True)
+
+    def __str__(self) -> str:
+        return f'<Course:{self.title}>'
