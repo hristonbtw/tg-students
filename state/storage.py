@@ -6,5 +6,8 @@ from typing import Optional
 storage = MemoryStorage()
 
 
-class States(StatesGroup):
-    heh = State()
+class Lesson(StatesGroup):
+    title = State()
+    description = State()
+    content = State()
+    task = State()

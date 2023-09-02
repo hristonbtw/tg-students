@@ -4,14 +4,14 @@ from functions import functions as func
 
 main_menu = InlineKeyboardBuilder()
 main_menu.button(text="👨🏻‍💻 Профиль", callback_data="profile")
-main_menu.button(text="🔧 Меню модератора", callback_data="mod_menu")
 main_menu.adjust(2, 2)
 main_menu = main_menu.as_markup()
 
 mod_menu = InlineKeyboardBuilder()
-mod_menu.button(text="Добавить товар", callback_data="add_product")
-mod_menu.button(text="Сделать рассылку", callback_data="make_messages")
-mod_menu.button(text="Изменить статус заказа", callback_data="change_status")
+mod_menu.button(text="Добавить урок", callback_data="add_lesson")
+mod_menu.button(text="Редактировать урок", callback_data="edit_lesson")
+mod_menu.button(text="Удалить урок", callback_data="remove_lesson")
+mod_menu.adjust(2, 2)
 mod_menu = mod_menu.as_markup()
 
 go_back_menu = InlineKeyboardBuilder()
