@@ -1,14 +1,15 @@
 from aiogram import Router, types
 from aiogram.fsm.context import FSMContext
 from aiogram import Bot
-from aiogram.types import URLInputFile
+from aiogram.types.input_file import BufferedInputFile
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from dotenv import load_dotenv, find_dotenv
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from functions import functions as func
 from keyboards import keyboards as kb
-from state.storage import Lesson
+from state.storage import Lesson, EditLesson
 
 from time import time, strftime, localtime
 import os
@@ -61,3 +62,59 @@ async def callback_handler(call: types.CallbackQuery, state: FSMContext, bot: Bo
 
         await state.set_state(Lesson.title)
         await call.message.answer("Введите название урока")
+
+    if call.data == "edit_lesson":
+        await call.answer()
+
+        lessons_keyboard = await func.get_all_lessons(session_maker=session_maker)
+        await call.message.edit_text(text='Выберите урок:', reply_markup=lessons_keyboard)
+
+    if call.data.startswith('edit_lesson_'):
+        await call.answer()
+
+        lesson_id = int(call.data.split("_")[2])
+        lesson_data = await func.get_lesson_data(lesson_id=lesson_id, session_maker=session_maker)
+        lesson_file = BufferedInputFile(file=lesson_data['task'], filename=lesson_data['task_filename'])
+
+        try:
+            await call.message.answer_video(lesson_data["content"], caption="Контент:")
+
+            await call.message.answer_document(document=lesson_file,
+                                               caption=f'Название урока: "{lesson_data["title"]}"'
+                                                       f'\nОписание урока: {lesson_data["description"]}'
+                                                       f'\nЗадание: ',
+                                               reply_markup=kb.edit_lesson_menu(lesson_id=lesson_id))
+
+        except TelegramBadRequest:
+            await call.message.answer_document(document=lesson_file,
+                                               caption=f'Название урока: "{lesson_data["title"]}"'
+                                                       f'\nОписание урока: {lesson_data["description"]}'
+                                                       f'\nКонтент: {lesson_data["content"]}'
+                                                       f'\nЗадание: ',
+                                               reply_markup=kb.edit_lesson_menu(lesson_id=lesson_id))
+
+    if call.data.startswith('change_lesson_'):
+        await call.answer()
+
+        lesson_id = int(call.data.split("_")[3])
+        option = call.data.split("_")[2]
+
+        await state.update_data(option=option)
+        await state.update_data(lesson_id=lesson_id)
+
+        if option == 'title':
+            await state.set_state(EditLesson.title)
+
+            await call.message.answer("Введите новое название урока")
+        elif option == 'description':
+            await state.set_state(EditLesson.description)
+
+            await call.message.answer("Введите новое описание урока")
+        elif option == 'content':
+            await state.set_state(EditLesson.content)
+
+            await call.message.answer("Отправьте новый контент для урока")
+        elif option == 'task':
+            await state.set_state(EditLesson.task)
+
+            await call.message.answer("Отправьте новое задание для урока")

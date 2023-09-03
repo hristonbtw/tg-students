@@ -11,3 +11,14 @@ class Lesson(StatesGroup):
     description = State()
     content = State()
     task = State()
+    filename = State()
+
+
+class EditLesson(StatesGroup):
+    title = State()
+    description = State()
+    content = State()
+    task = State()
+    filename = State()
+    option = State()
+    lesson_id = State()
