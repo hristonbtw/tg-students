@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.future import select
-from sqlalchemy import update
+from sqlalchemy import update, delete
 
 from db import User, Lesson
 from keyboards import keyboards as kb
@@ -41,7 +41,7 @@ async def create_lesson(data, session_maker: async_sessionmaker):
                     description=data['description'],
                     content=data['content'],
                     task=data['task'],
-                    task_filename=data['filename']
+                    task_filename=data['task_filename']
                 )
 
                 if await session.merge(lesson):
@@ -53,17 +53,20 @@ async def create_lesson(data, session_maker: async_sessionmaker):
         return False, e
 
 
-async def get_all_lessons(session_maker):
+async def get_all_lessons(option, session_maker):
     async with session_maker() as session:
         async with session.begin():
             row = await session.execute(text("select id, title from lessons"))
+
             data = {}
             for lesson_id, title in row:
                 data[lesson_id] = title
 
-            keyboard = kb.select_lesson_menu(data=data)
-
-            return keyboard
+            if data == {}:
+                return False
+            else:
+                keyboard = await kb.select_lesson_menu(option=option, data=data)
+                return keyboard
 
 
 async def get_lesson_data(lesson_id, session_maker):
@@ -112,12 +115,24 @@ async def edit_lesson_data(option: str, lesson_id: int, data: Union[str, bytes],
 
 
 async def get_file_data(message, bot: Bot):
-    file = await bot.get_file(message.document.file_id)
-    result = await bot.download_file(file.file_path)
-    filename = message.document.file_name
-    output_bytes = result.read()
+    try:
+        file = await bot.get_file(message.document.file_id)
+        result = await bot.download_file(file.file_path)
+        filename = message.document.file_name
+        output_bytes = result.read()
 
-    row = {'task': output_bytes,
-           'task_filename': filename}
+        row = {'task': output_bytes,
+               'task_filename': filename}
 
-    return row
+        return row
+    except AttributeError:
+        return message.text
+
+
+async def delete_lesson(lesson_id, session_maker):
+    async with session_maker() as session:
+        async with session.begin():
+            if await session.execute(delete(Lesson).where(Lesson.id == lesson_id)):
+                return True
+            else:
+                return False, 'Не удалось удалить урок'

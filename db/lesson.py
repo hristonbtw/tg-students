@@ -13,16 +13,16 @@ class Lesson(BaseModel):
     title = Column(VARCHAR(64), unique=True, nullable=False)
 
     # Lesson description
-    description = Column(TEXT, unique=False, nullable=False)
+    description = Column(TEXT, unique=False, nullable=True)
 
     # Lesson content
-    content = Column(TEXT, unique=False, nullable=False)
+    content = Column(TEXT, unique=False, nullable=True)
 
     # Lesson task
-    task = Column(LargeBinary, unique=False, nullable=False)
+    task = Column(LargeBinary, unique=False, nullable=True)
 
     # Lesson task filename
-    task_filename = Column(TEXT, unique=False, nullable=False)
+    task_filename = Column(TEXT, unique=False, nullable=True)
 
     def __str__(self) -> str:
         return f"<Lesson:{self.title}>"
